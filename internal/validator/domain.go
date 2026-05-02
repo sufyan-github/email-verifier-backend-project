@@ -1,4 +1,4 @@
-// internal/validator/domain.go
+// domain.go
 package validator
 
 import (
@@ -21,7 +21,14 @@ func ValidateDomain(email string) (bool, []string) {
 
 	var mxHosts []string
 	for _, mx := range mxRecords {
+		if mx.Host == "." {
+			continue
+		}
 		mxHosts = append(mxHosts, mx.Host)
+	}
+
+	if len(mxHosts) == 0 {
+		return false, nil
 	}
 
 	return true, mxHosts

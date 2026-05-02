@@ -1,26 +1,27 @@
-// internal/validator/verifier.go
+// disposable.go
 package validator
 
-import "email-verifier/internal/models"
+import "strings"
 
-func VerifyEmail(email string) models.VerificationResult {
-	result := models.VerificationResult{
-		Email: email,
+var disposableDomains = []string{
+	"mailinator.com",
+	"10minutemail.com",
+	"tempmail.com",
+}
+
+func IsDisposable(email string) bool {
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 {
+		return false
 	}
 
-	result.ValidSyntax = ValidateSyntax(email)
+	domain := parts[1]
 
-	if !result.ValidSyntax {
-		return result
+	for _, d := range disposableDomains {
+		if domain == d {
+			return true
+		}
 	}
 
-	validDomain, mxRecords := ValidateDomain(email)
-	result.ValidDomain = validDomain
-	result.MXRecords = mxRecords
-
-	if validDomain && len(mxRecords) > 0 {
-		result.SMTPValid = VerifySMTP(email, mxRecords[0])
-	}
-
-	return result
+	return false
 }
